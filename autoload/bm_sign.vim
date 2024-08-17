@@ -47,6 +47,9 @@ endfunction
 " add sign with certain index
 function! bm_sign#add_at(file, sign_idx, line_nr, is_annotation)
   call bm_sign#lazy_init()
+  if bufnr(a:file) ==# -1
+    return
+  endif
   let name = a:is_annotation ==# 1 ? "BookmarkAnnotation" : "Bookmark"
   execute "sign place ". a:sign_idx ." line=" . a:line_nr ." name=". name ." file=". a:file
   if (a:sign_idx >=# g:bm_sign_index)

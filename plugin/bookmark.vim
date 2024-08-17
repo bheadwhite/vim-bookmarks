@@ -224,31 +224,25 @@ command! -nargs=1 BookmarkSave call BookmarkSave(<f-args>, 0)
 function! BookmarkLoad(target_file, startup, silent)
   let supports_confirm = has("dialog_con") || has("dialog_gui")
   let has_bookmarks = bm#total_count() ># 0
-  let confirmed = 1
-  if (supports_confirm && has_bookmarks && !a:silent)
-    let confirmed = confirm("Do you want to override your ". bm#total_count() ." bookmarks?", "&Yes\n&No")
-  endif
-  if (confirmed ==# 1)
-    call s:remove_all_bookmarks()
-    try
-      let data = readfile(a:target_file)
-      let new_entries = bm#deserialize(data)
-      if !a:startup
-        for entry in new_entries
-          call bm_sign#add_at(entry['file'], entry['sign_idx'], entry['line_nr'], entry['annotation'] !=# "")
-        endfor
-        if (!a:silent)
-          echo "Bookmarks loaded"
-        endif
-        return 1
+  call s:remove_all_bookmarks()
+  try
+    let data = readfile(a:target_file)
+    let new_entries = bm#deserialize(data)
+    if !a:startup
+      for entry in new_entries
+        call bm_sign#add_at(entry['file'], entry['sign_idx'], entry['line_nr'], entry['annotation'] !=# "")
+      endfor
+      if (!a:silent)
+        echo "Bookmarks loaded"
       endif
-    catch
-      if (!a:startup && !a:silent)
-        echo "Failed to load/parse file"
-      endif
-      return 0
-    endtry
-  endif
+      return 1
+    endif
+  catch
+    if (!a:startup && !a:silent)
+      echo "Failed to load/parse file"
+    endif
+    return 0
+  endtry
 endfunction
 command! -nargs=1 LoadBookmarks call CallDeprecatedCommand('BookmarkLoad', [<f-args>, 0, 0])
 command! -nargs=1 BookmarkLoad call BookmarkLoad(<f-args>, 0, 0)
